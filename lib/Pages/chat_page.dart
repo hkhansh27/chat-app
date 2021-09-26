@@ -1,3 +1,5 @@
+import 'package:chat_app/CustomUI/custom_card.dart';
+import 'package:chat_app/Models/chat_model.dart';
 import 'package:flutter/material.dart';
 
 class ChatPage extends StatefulWidget {
@@ -8,15 +10,25 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  List<ChatModel> chats = [
+    ChatModel(name: "Khanh 1", isGroup: false, currentMessage: "Ohohoho", time: "16:26"),
+    ChatModel(name: "Khanh 2", isGroup: true, currentMessage: "Ahihiihihi", time: "21:26"),
+    ChatModel(name: "Khanh 3", isGroup: false, currentMessage: "Akakaka", time: "19:26"),
+  ];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print("Clicked on floating btn");
-        },
-        child: const Icon(Icons.chat),
-      ),
-    );
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            print("Clicked on floating btn");
+          },
+          child: const Icon(Icons.chat),
+        ),
+        body: ListView.builder(
+          itemBuilder: (contex, index) {
+            return CustomCard(chatModel: chats[index]);
+          },
+          itemCount: chats.length,
+        ));
   }
 }
