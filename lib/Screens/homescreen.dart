@@ -1,3 +1,4 @@
+import 'package:chat_app/Pages/chat_page.dart';
 import 'package:flutter/material.dart';
 
 class Homescreen extends StatefulWidget {
@@ -7,8 +8,7 @@ class Homescreen extends StatefulWidget {
   _HomescreenState createState() => _HomescreenState();
 }
 
-class _HomescreenState extends State<Homescreen>
-    with SingleTickerProviderStateMixin {
+class _HomescreenState extends State<Homescreen> with SingleTickerProviderStateMixin {
   late TabController _controller;
   @override
   void initState() {
@@ -23,10 +23,36 @@ class _HomescreenState extends State<Homescreen>
         title: const Text("Chat App"),
         actions: [
           IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
-          IconButton(onPressed: () {}, icon: const Icon(Icons.more_vert))
+          PopupMenuButton(onSelected: (value) {
+            print(value);
+          }, itemBuilder: (BuildContext context) {
+            return const [
+              PopupMenuItem(
+                child: Text("New group"),
+                value: "New group",
+              ),
+              PopupMenuItem(
+                child: Text("New broadcast"),
+                value: "New broadcast",
+              ),
+              PopupMenuItem(
+                child: Text("Web"),
+                value: "Web",
+              ),
+              PopupMenuItem(
+                child: Text("Starred a message"),
+                value: "Starred a message",
+              ),
+              PopupMenuItem(
+                child: Text("Settings"),
+                value: "Settings",
+              ),
+            ];
+          })
         ],
         bottom: TabBar(
           controller: _controller,
+          indicatorColor: Colors.green[400],
           tabs: const [
             Tab(icon: Icon(Icons.camera_alt)),
             Tab(text: "Chats"),
@@ -39,7 +65,7 @@ class _HomescreenState extends State<Homescreen>
         controller: _controller,
         children: const [
           Text("Camera"),
-          Text("Chats"),
+          ChatPage(),
           Text("Status"),
           Text("Calls"),
         ],
