@@ -1,5 +1,6 @@
 import 'package:chat_app/Models/chat_model.dart';
 import 'package:flutter/material.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 
 class IndividualPage extends StatefulWidget {
   const IndividualPage({Key? key, required this.chatModel}) : super(key: key);
@@ -9,9 +10,29 @@ class IndividualPage extends StatefulWidget {
 }
 
 class _IndividualPageState extends State<IndividualPage> {
+  bool showIcon = false;
+  //handle keyboard and emojipicker open at the same time (0)
+  FocusNode focusNode = FocusNode();
+
+  TextEditingController _textEditingController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    //handle when we click on back btn, the only emoji or keyboard is hidden not back to the homescreen (1)
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        setState(() {
+          showIcon = false;
+        });
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white70,
       appBar: AppBar(
           leadingWidth: 70,
           leading: InkWell(
@@ -21,9 +42,8 @@ class _IndividualPageState extends State<IndividualPage> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Icon(Icons.arrow_back, size: 25),
-                // const Padding(padding: EdgeInsets.only(right: 20)),
                 CircleAvatar(
-                  child: Icon(widget.chatModel.isGroup! ? Icons.groups : Icons.person),
+                  child: Icon(widget.chatModel.isGroup! ? Icons.groups : Icons.person, color: Colors.white),
                   radius: 20,
                   backgroundColor: Colors.deepPurpleAccent,
                 )
@@ -80,8 +100,91 @@ class _IndividualPageState extends State<IndividualPage> {
                   value: "Wallpaper",
                 ),
               ];
-            })
+            }),
           ]),
+      body: Container(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: WillPopScope(
+          child: Stack(
+            children: [
+              ListView(),
+              Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: MediaQuery.of(context).size.width - 55,
+                            child: Card(
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                              child: TextFormField(
+                                controller: _textEditingController,
+                                focusNode: focusNode,
+                                keyboardType: TextInputType.multiline,
+                                decoration: InputDecoration(
+                                    border: InputBorder.none,
+                                    hintText: "Type a message",
+                                    prefixIcon: IconButton(
+                                      icon: const Icon(Icons.emoji_emotions),
+                                      onPressed: () {
+                                        //handle (0)
+                                        focusNode.unfocus();
+                                        focusNode.canRequestFocus = false;
+                                        setState(() {
+                                          showIcon = !showIcon;
+                                        });
+                                      },
+                                    ),
+                                    suffixIcon: Row(mainAxisSize: MainAxisSize.min, children: [
+                                      IconButton(onPressed: () {}, icon: const Icon(Icons.attach_file)),
+                                      IconButton(onPressed: () {}, icon: const Icon(Icons.camera_alt))
+                                    ])),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(left: 5),
+                            child: CircleAvatar(
+                              child: IconButton(
+                                  onPressed: () {},
+                                  icon: const Icon(
+                                    Icons.mic,
+                                    color: Colors.white,
+                                  )),
+                              backgroundColor: Colors.deepPurple,
+                            ),
+                          )
+                        ],
+                      ),
+                      showIcon
+                          ? SizedBox(
+                              height: 207,
+                              child: EmojiPicker(onEmojiSelected: (Category category, Emoji emoji) {
+                                setState(() {
+                                  _textEditingController.text += emoji.emoji;
+                                });
+                              }))
+                          : Container()
+                    ],
+                  )),
+            ],
+          ),
+          onWillPop: () {
+            //handle (1)
+            if (showIcon) {
+              setState(() {
+                showIcon = false;
+              });
+            } else {
+              Navigator.pop(context);
+            }
+            return Future.value(false);
+          },
+        ),
+      ),
     );
   }
 }
