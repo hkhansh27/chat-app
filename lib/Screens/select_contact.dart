@@ -3,6 +3,8 @@ import 'package:chat_app/CustomUI/contact_card.dart';
 import 'package:chat_app/Models/chat_model.dart';
 import 'package:flutter/material.dart';
 
+import 'create_group.dart';
+
 class SelectContact extends StatefulWidget {
   const SelectContact({Key? key}) : super(key: key);
 
@@ -24,13 +26,13 @@ class _SelectContactState extends State<SelectContact> {
           title: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Select Contact", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              Text("26 contacts", style: const TextStyle(fontSize: 13))
+            children: const [
+              Text("Select Contact", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Text("26 contacts", style: TextStyle(fontSize: 13))
             ],
           ),
           actions: [
-            IconButton(onPressed: () {}, icon: Icon(Icons.search)),
+            IconButton(onPressed: () {}, icon: const Icon(Icons.search)),
             PopupMenuButton(onSelected: (value) {
               print(value);
             }, itemBuilder: (BuildContext context) {
@@ -57,13 +59,21 @@ class _SelectContactState extends State<SelectContact> {
         ),
         body: ListView.builder(
           itemBuilder: (context, index) {
-            if (index == 0)
-              return ButtonCard(
-                icon: Icons.group_add_sharp,
-                name: "New group",
+            if (index == 0) {
+              return InkWell(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (builder) => const CreateGroup()));
+                },
+                child: const ButtonCard(
+                  icon: Icons.group_add_sharp,
+                  name: "New group",
+                ),
               );
-            if (index == 1) return ButtonCard(icon: Icons.person_add, name: "New contact");
-            return ContactCard(contact: contacts[index - 2]);
+            }
+            if (index == 1) {
+              return InkWell(onTap: () {}, child: const ButtonCard(icon: Icons.person_add, name: "New contact"));
+            }
+            return InkWell(onTap: () {}, child: ContactCard(contact: contacts[index - 2]));
           },
           itemCount: contacts.length + 2, // "+2" because two btn card in the top of page
         ));

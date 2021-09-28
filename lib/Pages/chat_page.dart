@@ -21,7 +21,7 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            Navigator.push(context, MaterialPageRoute(builder: (builder) => SelectContact()));
+            Navigator.push(context, MaterialPageRoute(builder: (builder) => const SelectContact()));
           },
           child: const Icon(Icons.chat),
         ),

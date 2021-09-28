@@ -6,23 +6,40 @@ class ContactCard extends StatelessWidget {
   final ChatModel contact;
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {},
-      child: ListTile(
-        leading: CircleAvatar(
-          radius: 20,
-          child: Icon(Icons.person, color: Colors.white),
-          backgroundColor: Colors.blueGrey,
-        ),
-        title: Text("${contact.name}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        subtitle: Row(
-          children: [
-            const SizedBox(
-              width: 3,
-            ),
-            Text("${contact.status}")
-          ],
-        ),
+    return ListTile(
+      leading: Container(
+        height: 50,
+        width: 50,
+        child: Stack(children: [
+          const CircleAvatar(
+            radius: 20,
+            child: Icon(Icons.person, color: Colors.white),
+            backgroundColor: Colors.blueGrey,
+          ),
+          contact.select!
+              ? const Positioned(
+                  bottom: 5,
+                  right: 5,
+                  child: CircleAvatar(
+                    radius: 10,
+                    backgroundColor: Colors.green,
+                    child: Icon(
+                      Icons.check,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+              : Container()
+        ]),
+      ),
+      title: Text("${contact.name}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      subtitle: Row(
+        children: [
+          const SizedBox(
+            width: 3,
+          ),
+          Text("${contact.status}")
+        ],
       ),
     );
   }
