@@ -14,7 +14,7 @@ class _IndividualPageState extends State<IndividualPage> {
   //handle keyboard and emojipicker open at the same time (0)
   FocusNode focusNode = FocusNode();
 
-  TextEditingController _textEditingController = TextEditingController();
+  final TextEditingController _textEditingController = TextEditingController();
 
   @override
   void initState() {

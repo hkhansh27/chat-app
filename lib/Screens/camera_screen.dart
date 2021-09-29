@@ -1,3 +1,4 @@
+import 'package:chat_app/Screens/camera_view.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 
@@ -13,12 +14,13 @@ class CameraScreen extends StatefulWidget {
 
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController _cameraController;
-  late Future<void> cameraValue;
+  late Future<void> _cameraValue;
 
   @override
   void initState() {
+    super.initState();
     _cameraController = CameraController(cameras[0], ResolutionPreset.low);
-    cameraValue = _cameraController.initialize();
+    _cameraValue = _cameraController.initialize();
   }
 
   @override
@@ -27,7 +29,7 @@ class _CameraScreenState extends State<CameraScreen> {
       body: Stack(
         children: [
           FutureBuilder(
-              future: cameraValue,
+              future: _cameraValue,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.done) {
                   return CameraPreview(_cameraController);
@@ -50,7 +52,18 @@ class _CameraScreenState extends State<CameraScreen> {
                     children: [
                       IconButton(onPressed: () {}, icon: const Icon(Icons.flash_off, color: Colors.black, size: 30)),
                       InkWell(
-                        onTap: () {},
+                        onTap: () async {
+                          try {
+                            await Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const CameraView(),
+                              ),
+                            );
+                          } catch (e) {
+                            // If an error occurs, log the error to the console.
+                            print(e);
+                          }
+                        },
                         child: const Icon(Icons.panorama_fish_eye, color: Colors.black, size: 50),
                       ),
                       IconButton(

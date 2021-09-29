@@ -39,7 +39,7 @@ class _CreateGroupState extends State<CreateGroup> {
           ListView.builder(
             itemBuilder: (context, index) {
               if (index == 0) {
-                return Container(height: groupSelected.length > 0 ? 90 : 10);
+                return Container(height: groupSelected.isNotEmpty ? 90 : 10);
               }
 
               return InkWell(
@@ -63,7 +63,7 @@ class _CreateGroupState extends State<CreateGroup> {
             itemCount: contacts.length + 1,
           ),
           //conditional show container which contains users are selected
-          groupSelected.length > 0
+          groupSelected.isNotEmpty
               ? Column(
                   children: [
                     Container(
