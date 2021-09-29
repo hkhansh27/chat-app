@@ -71,7 +71,6 @@ class _CameraScreenState extends State<CameraScreen> {
                           icon: const Icon(Icons.flip_camera_ios_outlined, color: Colors.black, size: 30))
                     ],
                   ),
-                  const Text("Hold for video, tap for photo")
                 ],
               ),
             ),
