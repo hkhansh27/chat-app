@@ -3,6 +3,7 @@ import 'package:chat_app/CustomUI/receive_card.dart';
 import 'package:chat_app/Models/chat_model.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class IndividualPage extends StatefulWidget {
   const IndividualPage({Key? key, required this.chatModel}) : super(key: key);
@@ -16,11 +17,14 @@ class _IndividualPageState extends State<IndividualPage> {
   //handle keyboard and emojipicker open at the same time (0)
   FocusNode focusNode = FocusNode();
 
+  late IO.Socket socket;
+
   final TextEditingController _textEditingController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+    connect();
     //handle when we click on back btn, the only emoji or keyboard is hidden not back to the homescreen (1)
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
@@ -29,6 +33,16 @@ class _IndividualPageState extends State<IndividualPage> {
         });
       }
     });
+  }
+
+  void connect() {
+    socket = IO.io("http://192.168.1.13:3000", <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+    });
+    socket.connect();
+    socket.onConnect((data) => print("Connected"));
+    socket.emit("/test", "Hi cu");
   }
 
   @override
