@@ -1,4 +1,4 @@
-import 'package:chat_app/Screens/homescreen.dart';
+import 'package:chat_app/Screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:chat_app/Screens/camera_screen.dart';
 import 'package:camera/camera.dart';
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           fontFamily: 'SourceSansPro',
           colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple).copyWith(secondary: Colors.pinkAccent)),
-      home: const Homescreen(),
+      home: const LoginScreen(),
     );
   }
 }

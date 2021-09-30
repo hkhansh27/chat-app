@@ -1,15 +1,18 @@
+import 'package:chat_app/Models/chat_model.dart';
 import 'package:chat_app/Pages/camera_page.dart';
 import 'package:chat_app/Pages/chat_page.dart';
 import 'package:flutter/material.dart';
 
-class Homescreen extends StatefulWidget {
-  const Homescreen({Key? key}) : super(key: key);
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key, required this.chats, required this.currentChat}) : super(key: key);
+  final List<ChatModel> chats;
+  final ChatModel currentChat;
 
   @override
-  _HomescreenState createState() => _HomescreenState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomescreenState extends State<Homescreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late TabController _controller;
   @override
   void initState() {
@@ -67,11 +70,11 @@ class _HomescreenState extends State<Homescreen> with SingleTickerProviderStateM
       ),
       body: TabBarView(
         controller: _controller,
-        children: const [
-          CameraPage(),
-          ChatPage(),
-          Text("Status"),
-          Text("Calls"),
+        children: [
+          const CameraPage(),
+          ChatPage(chats: widget.chats, currentChat: widget.currentChat),
+          const Text("Status"),
+          const Text("Calls"),
         ],
       ),
     );

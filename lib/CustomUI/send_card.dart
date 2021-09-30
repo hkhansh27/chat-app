@@ -1,7 +1,9 @@
+import 'package:chat_app/Models/message_model.dart';
 import 'package:flutter/material.dart';
 
 class SendCard extends StatelessWidget {
-  const SendCard({Key? key}) : super(key: key);
+  SendCard({Key? key, required this.data}) : super(key: key);
+  late MessageModel data;
 
   @override
   Widget build(BuildContext context) {
@@ -17,25 +19,25 @@ class SendCard extends StatelessWidget {
             margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
             color: Colors.purple[100],
             child: Stack(children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 10, right: 30, top: 10, bottom: 20),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 30, top: 10, bottom: 20),
                 child: Text(
-                  "HihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihiHihihihihihi",
-                  style: TextStyle(fontSize: 16),
+                  "${data.message}",
+                  style: const TextStyle(fontSize: 16),
                 ),
               ),
               Positioned(
                   bottom: 4,
                   right: 10,
-                  child: Row(children: const [
+                  child: Row(children: [
                     Text(
-                      "9:03",
-                      style: TextStyle(fontSize: 13, color: Colors.black54),
+                      "${data.time}",
+                      style: const TextStyle(fontSize: 13, color: Colors.black54),
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: 5,
                     ),
-                    Icon(
+                    const Icon(
                       Icons.done,
                       size: 13,
                     )

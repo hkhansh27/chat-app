@@ -12,9 +12,9 @@ class CreateGroup extends StatefulWidget {
 
 class _CreateGroupState extends State<CreateGroup> {
   List<ChatModel> contacts = [
-    ChatModel(name: "Khanh 1", status: "Ahihihi1"),
-    ChatModel(name: "Khanh 2", status: "Ahihihi2"),
-    ChatModel(name: "Khanh 3", status: "Ahihihi3"),
+    ChatModel(id: 1, name: "Khanh 1", status: "Ahihihi1"),
+    ChatModel(id: 2, name: "Khanh 2", status: "Ahihihi2"),
+    ChatModel(id: 3, name: "Khanh 3", status: "Ahihihi3"),
   ];
 
   List<ChatModel> groupSelected = [];
