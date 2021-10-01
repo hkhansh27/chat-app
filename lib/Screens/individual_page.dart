@@ -1,11 +1,18 @@
+import 'dart:convert';
+
+import 'package:chat_app/CustomUI/receive_image_card.dart';
 import 'package:chat_app/CustomUI/send_card.dart';
 import 'package:chat_app/CustomUI/receive_card.dart';
+import 'package:chat_app/CustomUI/send_image_card.dart';
 import 'package:chat_app/Models/chat_model.dart';
 import 'package:chat_app/Models/message_model.dart';
+import 'package:chat_app/Screens/camera_screen.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 
 class IndividualPage extends StatefulWidget {
   const IndividualPage({Key? key, required this.chatModel, required this.currentChat}) : super(key: key);
@@ -28,6 +35,8 @@ class _IndividualPageState extends State<IndividualPage> {
 
   final TextEditingController _textEditingController = TextEditingController();
 
+  final ImagePicker _imagePicker = ImagePicker();
+  XFile? file;
   @override
   void initState() {
     super.initState();
@@ -45,7 +54,7 @@ class _IndividualPageState extends State<IndividualPage> {
   }
 
   void connect() {
-    socket = IO.io("http://192.168.1.13:3000", <String, dynamic>{
+    socket = IO.io("http://192.168.1.5:3000", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
@@ -53,22 +62,46 @@ class _IndividualPageState extends State<IndividualPage> {
     socket.emit("signin", widget.currentChat.id);
     socket.onConnect((data) {
       socket.on('message', (data) {
-        setMessage("receive", data["message"]);
+        setMessage("receive", data["message"], data["path"]);
         autoScrollToNewest();
       });
     });
   }
 
-  void sendMessage(String msg, int idSender, int idReceiver) {
-    setMessage("send", msg);
-    socket.emit("message", {"message": msg, "idSender": idSender, "idReceiver": idReceiver});
+  void sendMessage(String msg, int idSender, int idReceiver, String path) {
+    setMessage("send", msg, path);
+    socket.emit("message", {"message": msg, "idSender": idSender, "idReceiver": idReceiver, "path": path});
   }
 
-  void setMessage(String type, String message) {
+  void setMessage(String type, String message, String path) {
     MessageModel messageModel =
-        MessageModel(type: type, message: message, time: DateTime.now().toString().substring(10, 16));
+        MessageModel(type: type, message: message, time: DateTime.now().toString().substring(10, 16), path: path);
     setState(() {
       messages.add(messageModel);
+    });
+  }
+
+  void sendImage(String path, String message) async {
+    print("Duong dan cua anh ne 💰💰💰💰💰 ${path}");
+    print("💰💰💰💰💰 Caption cua anh la  ${message}");
+    var request = http.MultipartRequest("POST", Uri.parse("http://192.168.1.5:3000/addImage"));
+    if (path.isNotEmpty) {
+      request.files.add(await http.MultipartFile.fromPath("img", path));
+    }
+    request.headers.addAll({
+      "Content-type": "multipart/form-data",
+    });
+    http.StreamedResponse response = await request.send();
+
+    var httpRespone = await http.Response.fromStream(response);
+    var data = json.decode(httpRespone.body);
+
+    setMessage("send", message, path);
+    socket.emit("message", {
+      "message": message,
+      "idSender": widget.currentChat.id,
+      "idReceiver": widget.chatModel.id,
+      "path": data['path']
     });
   }
 
@@ -164,7 +197,11 @@ class _IndividualPageState extends State<IndividualPage> {
                             );
                           }
                           if (messages[index].type == "send") {
-                            return SendCard(data: messages[index]);
+                            if (messages[index].path != null) {
+                              return SendImageCard(path: messages[index].path);
+                            } else {
+                              return SendCard(data: messages[index]);
+                            }
                           } else {
                             return RecevieCard(data: messages[index]);
                           }
@@ -172,7 +209,6 @@ class _IndividualPageState extends State<IndividualPage> {
                 Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
-                      height: 70,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -220,7 +256,17 @@ class _IndividualPageState extends State<IndividualPage> {
                                                     builder: (builder) => bottomShet());
                                               },
                                               icon: const Icon(Icons.attach_file)),
-                                          IconButton(onPressed: () {}, icon: const Icon(Icons.camera_alt))
+                                          IconButton(
+                                              onPressed: () {
+                                                Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                    builder: (context) => CameraScreen(
+                                                      onSendImage: sendImage,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                              icon: const Icon(Icons.camera_alt))
                                         ])),
                                   ),
                                 ),
@@ -234,8 +280,8 @@ class _IndividualPageState extends State<IndividualPage> {
                                           //auto scroll to newest message is sent (2)
                                           autoScrollToNewest();
 
-                                          sendMessage(
-                                              _textEditingController.text, widget.currentChat.id, widget.chatModel.id);
+                                          sendMessage(_textEditingController.text, widget.currentChat.id,
+                                              widget.chatModel.id, "");
                                         }
                                         //clear text form field after sending a message
                                         _textEditingController.clear();
@@ -295,19 +341,29 @@ class _IndividualPageState extends State<IndividualPage> {
           child: Column(
             children: [
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                iconCreation(Icons.insert_drive_file, Colors.indigo, "Document"),
+                iconCreation(Icons.insert_drive_file, Colors.indigo, "Document", () {}),
                 const SizedBox(width: 40),
-                iconCreation(Icons.camera_alt, Colors.pinkAccent, "Camera"),
+                iconCreation(Icons.camera_alt, Colors.pinkAccent, "Camera", () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => CameraScreen(onSendImage: sendImage),
+                    ),
+                  );
+                }),
                 const SizedBox(width: 40),
-                iconCreation(Icons.insert_photo, Colors.green, "Photo"),
+                iconCreation(Icons.insert_photo, Colors.green, "Photo", () async {
+                  file = await _imagePicker.pickImage(source: ImageSource.gallery);
+                  sendImage(file!.path, "");
+                  Navigator.of(context).pop();
+                }),
               ]),
               const SizedBox(height: 25),
               Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                iconCreation(Icons.headphones, Colors.yellow, "Audio"),
+                iconCreation(Icons.headphones, Colors.yellow, "Audio", () {}),
                 const SizedBox(width: 40),
-                iconCreation(Icons.location_pin, Colors.blue, "Location"),
+                iconCreation(Icons.location_pin, Colors.blue, "Location", () {}),
                 const SizedBox(width: 40),
-                iconCreation(Icons.person, Colors.black, "Contact"),
+                iconCreation(Icons.person, Colors.black, "Contact", () {}),
               ])
             ],
           ),
@@ -316,9 +372,9 @@ class _IndividualPageState extends State<IndividualPage> {
     );
   }
 
-  Widget iconCreation(IconData icon, Color color, String text) {
+  Widget iconCreation(IconData icon, Color color, String text, Function onTap) {
     return InkWell(
-      onTap: () {},
+      onTap: () => onTap(),
       child: Column(children: [
         CircleAvatar(radius: 30, backgroundColor: color, child: Icon(icon, size: 28, color: Colors.white)),
         const SizedBox(height: 5),

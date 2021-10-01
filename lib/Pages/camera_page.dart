@@ -6,6 +6,8 @@ class CameraPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const CameraScreen();
+    return CameraScreen(
+      onSendImage: () {},
+    );
   }
 }

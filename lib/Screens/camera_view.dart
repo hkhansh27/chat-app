@@ -1,7 +1,14 @@
+import 'dart:io';
+import 'dart:async';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
+import 'package:path/path.dart';
 
 class CameraView extends StatelessWidget {
-  const CameraView({Key? key}) : super(key: key);
+  CameraView({Key? key, required this.onSendImage}) : super(key: key);
+  Function onSendImage;
+  TextEditingController _textEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -10,18 +17,21 @@ class CameraView extends StatelessWidget {
       body: Column(
         children: <Widget>[
           const Expanded(
-              child: FittedBox(
-            alignment: Alignment.topLeft,
-            fit: BoxFit.fill, // otherwise the logo will be tiny
-            child: Image(image: AssetImage('assets/images/virtual-screen.png')),
-          )),
+              child: Image(
+            image: AssetImage('assets/images/virtual-screen.png'),
+          )
+              // 'assets/images/virtual-screen.png'
+              ),
           TextFormField(
+            controller: _textEditingController,
             decoration: InputDecoration(
                 border: InputBorder.none,
                 hintText: "Add Captiop...",
                 prefixIcon: const Icon(Icons.add_photo_alternate_sharp),
                 suffixIcon: IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
                   icon: const Icon(Icons.send_outlined),
                 )),
           ),

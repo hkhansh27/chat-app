@@ -6,8 +6,8 @@ import 'package:camera/camera.dart';
 late List<CameraDescription> cameras;
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({Key? key}) : super(key: key);
-
+  CameraScreen({Key? key, required this.onSendImage}) : super(key: key);
+  Function onSendImage;
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
@@ -27,6 +27,7 @@ class _CameraScreenState extends State<CameraScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
+        fit: StackFit.expand,
         children: [
           FutureBuilder(
               future: _cameraValue,
@@ -56,8 +57,9 @@ class _CameraScreenState extends State<CameraScreen> {
                           try {
                             await Navigator.of(context).push(
                               MaterialPageRoute(
-                                builder: (context) => const CameraView(),
-                              ),
+                                  builder: (context) => CameraView(
+                                        onSendImage: widget.onSendImage,
+                                      )),
                             );
                           } catch (e) {
                             // If an error occurs, log the error to the console.
