@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:chat_app/Screens/camera_screen.dart';
 import 'package:camera/camera.dart';
 
+import 'Pages/login_page.dart';
+
 Future<void> main() async {
   //to use camera plugin must do this
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,7 +23,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           fontFamily: 'SourceSansPro',
           colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple).copyWith(secondary: Colors.pinkAccent)),
-      home: const LoginScreen(),
+      home: LoginPage(),
     );
   }
 }
