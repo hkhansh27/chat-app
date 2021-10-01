@@ -1,7 +1,10 @@
 import 'package:chat_app/Models/chat_model.dart';
 import 'package:chat_app/Pages/camera_page.dart';
 import 'package:chat_app/Pages/chat_page.dart';
+import 'package:chat_app/Pages/status_page.dart';
 import 'package:flutter/material.dart';
+
+import 'call_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, required this.chats, required this.currentChat}) : super(key: key);
@@ -73,8 +76,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         children: [
           const CameraPage(),
           ChatPage(chats: widget.chats, currentChat: widget.currentChat),
-          const Text("Status"),
-          const Text("Calls"),
+          const StatusPage(),
+          const CallScreen(),
         ],
       ),
     );
