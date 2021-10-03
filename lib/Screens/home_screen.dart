@@ -1,4 +1,5 @@
 import 'package:chat_app/Models/chat_model.dart';
+import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Pages/camera_page.dart';
 import 'package:chat_app/Pages/chat_page.dart';
 import 'package:chat_app/Pages/status_page.dart';
@@ -8,8 +9,8 @@ import 'call_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key, required this.chats, required this.currentChat}) : super(key: key);
-  final List<ChatModel> chats;
-  final ChatModel currentChat;
+  final List<User>? chats;
+  final User currentChat;
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -28,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          "Chat App",
+          "TikTik",
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         actions: [
@@ -75,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         controller: _controller,
         children: [
           const CameraPage(),
-          ChatPage(chats: widget.chats, currentChat: widget.currentChat),
+          ChatPage(chats: widget.chats!, currentChat: widget.currentChat),
           const StatusPage(),
           const CallScreen(),
         ],

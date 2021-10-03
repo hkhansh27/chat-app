@@ -23,7 +23,8 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
           fontFamily: 'SourceSansPro',
           colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.purple).copyWith(secondary: Colors.pinkAccent)),
-      home: LoginPage(),
+      // home: LoginPage(),
+      home: LoginScreen(),
     );
   }
 }

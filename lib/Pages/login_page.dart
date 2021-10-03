@@ -1,10 +1,12 @@
 import 'package:chat_app/Screens/login_screen.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_login/flutter_login.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 const users = const {
   'dribbble@gmail.com': '12345',
   'hunter@gmail.com': 'hunter',
+  'hihihihi': 'khanh',
 };
 
 class LoginPage extends StatelessWidget {
@@ -33,11 +35,26 @@ class LoginPage extends StatelessWidget {
     });
   }
 
+  FormFieldValidator<String> _validatorFirstName = (value) {
+    if (value!.isEmpty) {
+      return 'Invalid first name!';
+    }
+    return null;
+  };
+
+  FormFieldValidator<String> _validatorLastName = (value) {
+    if (value!.isEmpty) {
+      return 'Invalid last name!';
+    }
+    return null;
+  };
+
   @override
   Widget build(BuildContext context) {
     return FlutterLogin(
       title: 'TIKTIK',
-      // logo: 'assets/images/ecorp-lightblue.png',
+      userValidator: _validatorFirstName,
+      passwordValidator: _validatorLastName,
       onLogin: _authUser,
       onSignup: _authUser,
       onSubmitAnimationCompleted: () {
@@ -46,6 +63,14 @@ class LoginPage extends StatelessWidget {
         ));
       },
       onRecoverPassword: _recoverPassword,
+      messages: LoginMessages(
+        userHint: 'First name',
+        passwordHint: 'Last name',
+        confirmPasswordHint: 'Confirm',
+        loginButton: 'LOG IN',
+        signupButton: 'REGISTER',
+        forgotPasswordButton: 'Forgot huh?',
+      ),
     );
   }
 }

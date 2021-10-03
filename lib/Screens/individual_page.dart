@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chat_app/CustomUI/receive_image_card.dart';
 import 'package:chat_app/CustomUI/send_card.dart';
@@ -6,6 +7,9 @@ import 'package:chat_app/CustomUI/receive_card.dart';
 import 'package:chat_app/CustomUI/send_image_card.dart';
 import 'package:chat_app/Models/chat_model.dart';
 import 'package:chat_app/Models/message_model.dart';
+import 'package:chat_app/Models/msg_model.dart';
+import 'package:chat_app/Models/rooms_model.dart';
+import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Screens/camera_screen.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +19,11 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 
 class IndividualPage extends StatefulWidget {
-  const IndividualPage({Key? key, required this.chatModel, required this.currentChat}) : super(key: key);
-  final ChatModel chatModel, currentChat;
+  const IndividualPage({Key? key, required this.conversation, required this.currentChat, required this.chatModel})
+      : super(key: key);
+
+  final Conversation conversation;
+  final User chatModel, currentChat;
 
   @override
   _IndividualPageState createState() => _IndividualPageState();
@@ -25,6 +32,9 @@ class IndividualPage extends StatefulWidget {
 class _IndividualPageState extends State<IndividualPage> {
   bool showIcon = false;
   bool sendBtn = false;
+
+  late List<Conversation> conversations;
+
   List<MessageModel> messages = [];
 
   late ScrollController _scrollController;
@@ -32,14 +42,17 @@ class _IndividualPageState extends State<IndividualPage> {
   FocusNode focusNode = FocusNode();
 
   late io.Socket socket;
-
   final TextEditingController _textEditingController = TextEditingController();
-
   final ImagePicker _imagePicker = ImagePicker();
   XFile? file;
+
+  late List<Message> messageList;
+
   @override
   void initState() {
     super.initState();
+    fetchConversationInRoom();
+
     connect();
     //auto scroll to newest message is send (2)
     _scrollController = ScrollController();
@@ -54,16 +67,18 @@ class _IndividualPageState extends State<IndividualPage> {
   }
 
   void connect() {
-    socket = io.io("http://192.168.1.5:3000", <String, dynamic>{
+    socket = io.io("http://192.168.1.14:8080", <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
     socket.connect();
-    socket.emit("signin", widget.currentChat.id);
+
+    //TODO: new API
+    socket.emit("identity", "0895a32963e44707b09902f544f3477c");
+    socket.emit('subscribe', '85c36409627f46e8a1e4461f2b65bec1');
     socket.onConnect((data) {
-      socket.on('message', (data) {
-        setMessage("receive", data["message"], data["path"]);
-        autoScrollToNewest();
+      socket.on('new message', (data) {
+        print(data);
       });
     });
   }
@@ -84,25 +99,51 @@ class _IndividualPageState extends State<IndividualPage> {
   void sendImage(String path, String message) async {
     print("Duong dan cua anh ne 💰💰💰💰💰 ${path}");
     print("💰💰💰💰💰 Caption cua anh la  $message");
-    var request = http.MultipartRequest("POST", Uri.parse("http://192.168.1.5:3000/addImage"));
-    if (path.isNotEmpty) {
-      request.files.add(await http.MultipartFile.fromPath("img", path));
+    // var request = http.MultipartRequest("POST", Uri.parse("http://192.168.1.14:3000/addImage"));
+    // if (path.isNotEmpty) {
+    //   request.files.add(await http.MultipartFile.fromPath("img", path));
+    // }
+    // request.headers.addAll({
+    //   "Content-type": "multipart/form-data",
+    // });
+    // http.StreamedResponse response = await request.send();
+
+    // var httpRespone = await http.Response.fromStream(response);
+    // var data = json.decode(httpRespone.body);
+
+    // setMessage("send", message, path);
+    // socket.emit("message", {
+    //   "message": message,
+    //   "idSender": widget.currentChat.id,
+    //   "idReceiver": widget.chatModel.id,
+    //   "path": data['path']
+    // });
+  }
+
+  Future<void> sentMsgOnApi(String msg) async {
+    final response =
+        await http.post(Uri.parse('http://192.168.1.14:8080/room/85c36409627f46e8a1e4461f2b65bec1/message'),
+            // Send authorization headers to the backend.
+            headers: {
+          "Authorization":
+              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwODk1YTMyOTYzZTQ0NzA3YjA5OTAyZjU0NGYzNDc3YyIsInVzZXJUeXBlIjoiYWRtaW4iLCJpYXQiOjE2MzE4OTU1MTR9.T_8gZCm7uxwIRB_OtrmB3sI5oYlGeWRKwtM5q0aNd6M',
+        }, body: {
+      "messageText": msg
+    });
+  }
+
+  Future<List<Conversation>> fetchConversationInRoom() async {
+    final response = await http.get(
+      Uri.parse("http://192.168.1.14:8080/room/${widget.conversation.chatRoomId}"),
+      headers: {
+        "Authorization": 'Bearer ${widget.currentChat.token}',
+      },
+    );
+    if (response.statusCode == 200) {
+      return Rooms.fromJson(jsonDecode(response.body)).conversations;
+    } else {
+      throw Exception('Failed to load rooms');
     }
-    request.headers.addAll({
-      "Content-type": "multipart/form-data",
-    });
-    http.StreamedResponse response = await request.send();
-
-    var httpRespone = await http.Response.fromStream(response);
-    var data = json.decode(httpRespone.body);
-
-    setMessage("send", message, path);
-    socket.emit("message", {
-      "message": message,
-      "idSender": widget.currentChat.id,
-      "idReceiver": widget.chatModel.id,
-      "path": data['path']
-    });
   }
 
   @override
@@ -117,10 +158,11 @@ class _IndividualPageState extends State<IndividualPage> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Icon(Icons.arrow_back, size: 25),
+                children: const [
+                  Icon(Icons.arrow_back, size: 25),
                   CircleAvatar(
-                    child: Icon(widget.chatModel.isGroup! ? Icons.groups : Icons.person, color: Colors.white),
+                    child: Icon(Icons.person, color: Colors.white),
+                    // Icon(widget.chatModel.isGroup! ? Icons.groups : Icons.person, color: Colors.white),
                     radius: 20,
                     backgroundColor: Colors.deepPurpleAccent,
                   )
@@ -133,7 +175,7 @@ class _IndividualPageState extends State<IndividualPage> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(widget.chatModel.name!,
+                  Text(widget.chatModel.firstName!,
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -186,30 +228,40 @@ class _IndividualPageState extends State<IndividualPage> {
             child: Column(
               children: [
                 Expanded(
-                    child: ListView.builder(
-                        controller: _scrollController,
-                        itemCount: messages.length + 1,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          if (index == messages.length) {
-                            return Container(
-                              height: 70,
-                            );
-                          }
-                          if (messages[index].type == "send") {
-                            if (messages[index].path.isNotEmpty) {
-                              return SendImageCard(path: messages[index].path);
-                            } else {
-                              return SendCard(data: messages[index]);
-                            }
-                          } else {
-                            if (messages[index].path.isNotEmpty) {
-                              return ReceiveImageCard(path: messages[index].path);
-                            } else {
-                              return RecevieCard(data: messages[index]);
-                            }
-                          }
-                        })),
+                  child: FutureBuilder(
+                    future: fetchConversationInRoom(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        conversations = snapshot.data as List<Conversation>;
+                        return ListView.builder(
+                            controller: _scrollController,
+                            itemCount: messages.length + 1,
+                            shrinkWrap: true,
+                            itemBuilder: (context, index) {
+                              if (index == messages.length) {
+                                return Container(
+                                  height: 70,
+                                );
+                              }
+                              if (messages[index].type == "send") {
+                                if (messages[index].path.isNotEmpty) {
+                                  return SendImageCard(path: messages[index].path);
+                                } else {
+                                  return SendCard(data: messages[index]);
+                                }
+                              } else {
+                                if (messages[index].path.isNotEmpty) {
+                                  return ReceiveImageCard(path: messages[index].path);
+                                } else {
+                                  return RecevieCard(data: messages[index]);
+                                }
+                              }
+                            });
+                      } else
+                        return const CircularProgressIndicator();
+                    },
+                  ),
+                ),
                 Align(
                     alignment: Alignment.bottomCenter,
                     child: Column(
@@ -283,8 +335,10 @@ class _IndividualPageState extends State<IndividualPage> {
                                         //auto scroll to newest message is sent (2)
                                         autoScrollToNewest();
 
-                                        sendMessage(_textEditingController.text, widget.currentChat.id,
-                                            widget.chatModel.id, "");
+                                        // sendMessage(_textEditingController.text, widget.currentChat.id,
+                                        //     widget.chatModel.id, "");
+
+                                        sentMsgOnApi(_textEditingController.text);
                                       }
                                       //clear text form field after sending a message
                                       _textEditingController.clear();

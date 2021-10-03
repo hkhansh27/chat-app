@@ -1,6 +1,6 @@
 import 'package:chat_app/CustomUI/button_card.dart';
 import 'package:chat_app/Models/chat_model.dart';
-import 'package:chat_app/Models/user_model.dart';
+import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Screens/home_screen.dart';
 import 'package:chat_app/Screens/login_screen.dart';
 import 'package:flutter_login/flutter_login.dart';
@@ -32,7 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<Users> fetchUsers() async {
-    final response = await http.get(Uri.parse("http://192.168.1.5:8080/users"));
+    final response = await http.get(Uri.parse("http://192.168.1.14:8080/users"));
     if (response.statusCode == 200) {
       return Users.fromJson(jsonDecode(response.body));
     } else {
@@ -46,14 +46,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return Future.delayed(loginTime).then((_) {
       bool hasUser = false;
       String? _userId = "";
-      int i = 0;
       userList?.forEach((usr) {
         if (usr.firstName == (data.name) && usr.lastName == data.password) {
           hasUser = true;
           _userId = usr.id;
           currentUser = usr;
         }
-        i++;
       });
       if (hasUser) {
         userList!.remove(currentUser);
@@ -117,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<String> userLogin(String? userId) async {
-    final response = await http.post(Uri.parse("http://192.168.1.5:8080/login/${userId}"), body: "");
+    final response = await http.post(Uri.parse("http://192.168.1.14:8080/login/${userId}"), body: "");
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
 
