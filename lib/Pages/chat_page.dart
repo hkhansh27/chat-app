@@ -4,6 +4,7 @@ import 'package:chat_app/Models/msg_model.dart';
 import 'package:chat_app/Models/rooms_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Screens/select_contact.dart';
+import 'package:chat_app/Util/const.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -29,7 +30,7 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<List<Conversation>> fetchRecentChat() async {
     final response = await http.get(
-      Uri.parse("http://192.168.1.14:8080/room"),
+      Uri.parse("${API}/room"),
       headers: {
         "Authorization": 'Bearer ${widget.currentChat.token}',
       },
@@ -72,8 +73,4 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
-
-  // Widget conversationWidget() {
-  //   return
-  // }
 }

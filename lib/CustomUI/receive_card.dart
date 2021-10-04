@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class RecevieCard extends StatelessWidget {
   const RecevieCard({Key? key, required this.data}) : super(key: key);
-  final MessageModel data;
+  final String data;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class RecevieCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10, right: 30, top: 10, bottom: 20),
                 child: Text(
-                  "${data.message}",
+                  "${data}",
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
@@ -30,7 +30,7 @@ class RecevieCard extends StatelessWidget {
                   bottom: 4,
                   right: 10,
                   child: Text(
-                    "${data.time}",
+                    "${DateTime.now().toString().substring(10, 16)}",
                     style: const TextStyle(fontSize: 13, color: Colors.black54),
                   ))
             ])),

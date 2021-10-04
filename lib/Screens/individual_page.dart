@@ -11,6 +11,7 @@ import 'package:chat_app/Models/msg_model.dart';
 import 'package:chat_app/Models/rooms_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Screens/camera_screen.dart';
+import 'package:chat_app/Util/const.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -33,6 +34,7 @@ class _IndividualPageState extends State<IndividualPage> {
   bool showIcon = false;
   bool sendBtn = false;
 
+  late Future<List<Conversation>> futureConversation;
   late List<Conversation> conversations;
 
   List<MessageModel> messages = [];
@@ -41,19 +43,16 @@ class _IndividualPageState extends State<IndividualPage> {
   //handle keyboard and emojipicker open at the same time (0)
   FocusNode focusNode = FocusNode();
 
-  late io.Socket socket;
+  io.Socket? socket;
   final TextEditingController _textEditingController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   XFile? file;
-
-  late List<Message> messageList;
+  // late List<Message> messageList;
 
   @override
   void initState() {
     super.initState();
-    fetchConversationInRoom();
-
-    connect();
+    futureConversation = fetchConversationInRoom();
     //auto scroll to newest message is send (2)
     _scrollController = ScrollController();
     //handle when we click on back btn, the only emoji or keyboard is hidden not back to the homescreen (1)
@@ -64,35 +63,75 @@ class _IndividualPageState extends State<IndividualPage> {
         });
       }
     });
+    connect();
   }
 
   void connect() {
-    socket = io.io("http://192.168.1.14:8080", <String, dynamic>{
+    socket = io.io("${API}", <String, dynamic>{
       "transports": ["websocket"],
-      "autoConnect": false,
+      "autoConnect": true,
     });
-    socket.connect();
+
+    socket!.connect();
 
     //TODO: new API
-    socket.emit("identity", "0895a32963e44707b09902f544f3477c");
-    socket.emit('subscribe', '85c36409627f46e8a1e4461f2b65bec1');
-    socket.onConnect((data) {
-      socket.on('new message', (data) {
-        print(data);
+    socket!.emit("identity", widget.currentChat.id);
+
+    // print('Userid ne nene room: ${widget.conversation.chatRoomId}, otherUserId: ${_otherUserId}');
+    otherUserId();
+
+    socket.onConnect((_) {
+      print('connected');
+
+      socket!.on("newMessage", (_data) {
+        print('sao ko chiuj vo day?');
+
+        setMessage(_data['postedByUser']['_id'], _data['message']['messageText']);
+        autoScrollToNewest();
       });
     });
   }
 
-  void sendMessage(String msg, int idSender, int idReceiver, String path) {
-    setMessage("send", msg, path);
-    socket.emit("message", {"message": msg, "idSender": idSender, "idReceiver": idReceiver, "path": path});
+  void setMessage(String postedByUserId, String message) {
+    User _usr = new User(id: postedByUserId);
+    Message _msg = new Message(messageText: message);
+
+    Conversation cvs = new Conversation(
+      postedByUserId: _usr,
+      message: _msg,
+    );
+
+    setState(() {
+      conversations.add(cvs);
+    });
   }
 
-  void setMessage(String type, String message, String path) {
-    MessageModel messageModel =
-        MessageModel(type: type, message: message, time: DateTime.now().toString().substring(10, 16), path: path);
-    setState(() {
-      messages.add(messageModel);
+  Future<void> otherUserId() async {
+    String? _otherUserId = "";
+    List<Conversation> _csvList = await fetchConversationInRoom();
+
+    await Future.forEach(_csvList, (_csv) async {
+      var __csv = _csv as Conversation;
+      if (__csv.postedByUserId!.id != widget.currentChat.id) {
+        _otherUserId = __csv.postedByUserId!.id;
+      }
+    });
+    socket!.emit('subscribe', {
+      widget.conversation.chatRoomId,
+      //FIX: otherUserId
+      widget.currentChat.id == '379f409892ad40faa801298f7e69f191'
+          ? '3b2ab7e5bcad47ebb3ada7888409e4d9'
+          : '379f409892ad40faa801298f7e69f191'
+    });
+  }
+
+  Future<void> sendMsg(String msg) async {
+    final response = await http.post(Uri.parse('${API}/room/${conversations[0].chatRoomId}/message'),
+        // Send authorization headers to the backend.
+        headers: {
+          "Authorization": 'Bearer ${widget.currentChat.token}',
+        }, body: {
+      "messageText": msg
     });
   }
 
@@ -120,21 +159,9 @@ class _IndividualPageState extends State<IndividualPage> {
     // });
   }
 
-  Future<void> sentMsgOnApi(String msg) async {
-    final response =
-        await http.post(Uri.parse('http://192.168.1.14:8080/room/85c36409627f46e8a1e4461f2b65bec1/message'),
-            // Send authorization headers to the backend.
-            headers: {
-          "Authorization":
-              'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiIwODk1YTMyOTYzZTQ0NzA3YjA5OTAyZjU0NGYzNDc3YyIsInVzZXJUeXBlIjoiYWRtaW4iLCJpYXQiOjE2MzE4OTU1MTR9.T_8gZCm7uxwIRB_OtrmB3sI5oYlGeWRKwtM5q0aNd6M',
-        }, body: {
-      "messageText": msg
-    });
-  }
-
   Future<List<Conversation>> fetchConversationInRoom() async {
     final response = await http.get(
-      Uri.parse("http://192.168.1.14:8080/room/${widget.conversation.chatRoomId}"),
+      Uri.parse("${API}/room/${widget.conversation.chatRoomId}"),
       headers: {
         "Authorization": 'Bearer ${widget.currentChat.token}',
       },
@@ -229,34 +256,36 @@ class _IndividualPageState extends State<IndividualPage> {
               children: [
                 Expanded(
                   child: FutureBuilder(
-                    future: fetchConversationInRoom(),
+                    future: futureConversation,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         conversations = snapshot.data as List<Conversation>;
                         return ListView.builder(
                             controller: _scrollController,
-                            itemCount: messages.length + 1,
+                            itemCount: conversations.length + 1,
                             shrinkWrap: true,
                             itemBuilder: (context, index) {
-                              if (index == messages.length) {
+                              if (index == conversations.length) {
                                 return Container(
                                   height: 70,
                                 );
                               }
-                              if (messages[index].type == "send") {
-                                if (messages[index].path.isNotEmpty) {
-                                  return SendImageCard(path: messages[index].path);
-                                } else {
-                                  return SendCard(data: messages[index]);
-                                }
+                              if (conversations[index].postedByUserId!.id == widget.currentChat.id) {
+                                return SendCard(data: conversations[index].message!.messageText);
+                                //  if (messages[index].path.isNotEmpty) {
+                                //   return SendImageCard(path: messages[index].path);
+                                // } else {
+                                //   return SendCard(data: conversations[index].message!.messageText);
+                                // }
                               } else {
-                                if (messages[index].path.isNotEmpty) {
-                                  return ReceiveImageCard(path: messages[index].path);
-                                } else {
-                                  return RecevieCard(data: messages[index]);
-                                }
+                                // if (messages[index].path.isNotEmpty) {
+                                //   return ReceiveImageCard(path: messages[index].path);
+                                // } else {
+                                return RecevieCard(data: conversations[index].message!.messageText);
                               }
-                            });
+                            }
+                            // }
+                            );
                       } else
                         return const CircularProgressIndicator();
                     },
@@ -334,11 +363,7 @@ class _IndividualPageState extends State<IndividualPage> {
                                       if (sendBtn) {
                                         //auto scroll to newest message is sent (2)
                                         autoScrollToNewest();
-
-                                        // sendMessage(_textEditingController.text, widget.currentChat.id,
-                                        //     widget.chatModel.id, "");
-
-                                        sentMsgOnApi(_textEditingController.text);
+                                        sendMsg(_textEditingController.text);
                                       }
                                       //clear text form field after sending a message
                                       _textEditingController.clear();

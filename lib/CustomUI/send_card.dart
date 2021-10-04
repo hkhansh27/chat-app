@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class SendCard extends StatelessWidget {
   SendCard({Key? key, required this.data}) : super(key: key);
-  late MessageModel data;
+  late String data;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class SendCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10, right: 30, top: 10, bottom: 20),
                 child: Text(
-                  "${data.message}",
+                  "${data}",
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
@@ -31,7 +31,7 @@ class SendCard extends StatelessWidget {
                   right: 10,
                   child: Row(children: [
                     Text(
-                      "${data.time}",
+                      "${DateTime.now().toString().substring(10, 16)}",
                       style: const TextStyle(fontSize: 13, color: Colors.black54),
                     ),
                     const SizedBox(

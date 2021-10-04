@@ -22,6 +22,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _controller = TabController(length: 4, vsync: this, initialIndex: 1);
+    print(widget.currentChat.token);
   }
 
   @override

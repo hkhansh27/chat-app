@@ -42,7 +42,8 @@ class CustomCard extends StatelessWidget {
                 const SizedBox(
                   width: 3,
                 ),
-                Text(conversation.message!.messageText)
+                Container(
+                    width: MediaQuery.of(context).size.width - 200, child: Text(conversation.message!.messageText))
                 // Text("${chatModel.currentMessage}")
               ],
             ),

@@ -16,6 +16,6 @@ class Message {
   @override
   String toString() {
     // TODO: implement toString
-    return '😛duoc gui tu msgmodel😱';
+    return '${this.messageText}';
   }
 }
