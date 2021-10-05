@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_this
+
 import 'package:chat_app/Models/msg_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 
@@ -17,8 +19,7 @@ class Rooms {
   }
   @override
   String toString() {
-    // TODO: implement toString
-    return '{ day la cai room, ${this.conversations}}';
+    return '{ day la cai room, ${conversations}}';
   }
 }
 

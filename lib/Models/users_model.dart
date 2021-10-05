@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_this
+
 class Users {
   late bool isSuccess;
   late List<User>? users;
@@ -17,7 +19,6 @@ class Users {
   }
   @override
   String toString() {
-    // TODO: implement toString
     return '{✅✅✅✅ ${this.isSuccess}, ${this.users}}';
   }
 }

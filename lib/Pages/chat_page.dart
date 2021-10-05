@@ -1,13 +1,12 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:chat_app/CustomUI/custom_card.dart';
-import 'package:chat_app/Models/chat_model.dart';
-import 'package:chat_app/Models/msg_model.dart';
 import 'package:chat_app/Models/rooms_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Screens/select_contact.dart';
 import 'package:chat_app/Util/const.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ChatPage extends StatefulWidget {
@@ -21,16 +20,16 @@ class ChatPage extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPage> {
   late List<Conversation> _conversations;
-  late Future<List<Conversation>> futureConversation;
+  late Future<List<Conversation>> futureRecentChat;
   @override
   void initState() {
     super.initState();
-    fetchRecentChat();
+    futureRecentChat = fetchRecentChat();
   }
 
   Future<List<Conversation>> fetchRecentChat() async {
     final response = await http.get(
-      Uri.parse("${API}/room"),
+      Uri.parse("$API/room"),
       headers: {
         "Authorization": 'Bearer ${widget.currentChat.token}',
       },
@@ -52,10 +51,10 @@ class _ChatPageState extends State<ChatPage> {
         child: const Icon(Icons.chat),
       ),
       body: FutureBuilder(
-        future: fetchRecentChat(),
+        future: futureRecentChat,
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-            //TODO: render messages from db
+            //fetch data from db to local variable by fetchRecent function
             _conversations = snapshot.data as List<Conversation>;
             return ListView.builder(
               itemCount: _conversations.length,

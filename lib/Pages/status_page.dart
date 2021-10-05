@@ -43,7 +43,7 @@ class _StatusPageState extends State<StatusPage> {
             const SizedBox(
               height: 16,
             ),
-            OwnStatus(),
+            const OwnStatus(),
             Container(
               height: 33,
               width: MediaQuery.of(context).size.width,

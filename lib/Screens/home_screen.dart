@@ -1,4 +1,3 @@
-import 'package:chat_app/Models/chat_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Pages/camera_page.dart';
 import 'package:chat_app/Pages/chat_page.dart';

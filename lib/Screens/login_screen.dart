@@ -1,13 +1,10 @@
-import 'package:chat_app/CustomUI/button_card.dart';
-import 'package:chat_app/Models/chat_model.dart';
-import 'package:chat_app/Models/users_model.dart';
-import 'package:chat_app/Screens/home_screen.dart';
-import 'package:chat_app/Screens/login_screen.dart';
-import 'package:chat_app/Util/const.dart';
-import 'package:flutter_login/flutter_login.dart';
-import 'package:flutter/material.dart';
 import 'dart:async';
 import 'dart:convert';
+import 'package:chat_app/Models/users_model.dart';
+import 'package:chat_app/Screens/home_screen.dart';
+import 'package:chat_app/Util/const.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_login/flutter_login.dart';
 import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
@@ -33,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<Users> fetchUsers() async {
-    final response = await http.get(Uri.parse("${API}/users"));
+    final response = await http.get(Uri.parse("$API/users"));
     if (response.statusCode == 200) {
       return Users.fromJson(jsonDecode(response.body));
     } else {
@@ -41,7 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Duration get loginTime => Duration(milliseconds: 2250);
+  Duration get loginTime => const Duration(milliseconds: 2250);
 
   Future<String> _authUser(LoginData data) {
     return Future.delayed(loginTime).then((_) {
@@ -60,8 +57,9 @@ class _LoginScreenState extends State<LoginScreen> {
           currentUser.token = token;
         });
         return "";
-      } else
+      } else {
         return "User not found, please try again!";
+      }
     });
   }
 
@@ -116,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<String> userLogin(String? userId) async {
-    final response = await http.post(Uri.parse("${API}/login/${userId}"), body: "");
+    final response = await http.post(Uri.parse("$API/login/$userId"), body: "");
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);
 

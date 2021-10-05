@@ -1,4 +1,3 @@
-import 'package:chat_app/Models/message_model.dart';
 import 'package:flutter/material.dart';
 
 class RecevieCard extends StatelessWidget {
@@ -22,7 +21,7 @@ class RecevieCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10, right: 30, top: 10, bottom: 20),
                 child: Text(
-                  "${data}",
+                  data,
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
@@ -30,7 +29,7 @@ class RecevieCard extends StatelessWidget {
                   bottom: 4,
                   right: 10,
                   child: Text(
-                    "${DateTime.now().toString().substring(10, 16)}",
+                    DateTime.now().toString().substring(10, 16),
                     style: const TextStyle(fontSize: 13, color: Colors.black54),
                   ))
             ])),

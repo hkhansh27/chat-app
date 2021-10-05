@@ -1,4 +1,3 @@
-import 'package:chat_app/Models/chat_model.dart';
 import 'package:chat_app/Models/rooms_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Screens/individual_page.dart';

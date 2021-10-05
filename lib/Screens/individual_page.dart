@@ -1,23 +1,19 @@
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:chat_app/CustomUI/receive_image_card.dart';
-import 'package:chat_app/CustomUI/send_card.dart';
 import 'package:chat_app/CustomUI/receive_card.dart';
-import 'package:chat_app/CustomUI/send_image_card.dart';
-import 'package:chat_app/Models/chat_model.dart';
-import 'package:chat_app/Models/message_model.dart';
+import 'package:chat_app/CustomUI/send_card.dart';
+
 import 'package:chat_app/Models/msg_model.dart';
 import 'package:chat_app/Models/rooms_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Screens/camera_screen.dart';
 import 'package:chat_app/Util/const.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/material.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:socket_io_client/socket_io_client.dart' as io;
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:socket_io_client/socket_io_client.dart' as io;
 
 class IndividualPage extends StatefulWidget {
   const IndividualPage({Key? key, required this.conversation, required this.currentChat, required this.chatModel})
@@ -37,8 +33,6 @@ class _IndividualPageState extends State<IndividualPage> {
   late Future<List<Conversation>> futureConversation;
   late List<Conversation> conversations;
 
-  List<MessageModel> messages = [];
-
   late ScrollController _scrollController;
   //handle keyboard and emojipicker open at the same time (0)
   FocusNode focusNode = FocusNode();
@@ -47,6 +41,8 @@ class _IndividualPageState extends State<IndividualPage> {
   final TextEditingController _textEditingController = TextEditingController();
   final ImagePicker _imagePicker = ImagePicker();
   XFile? file;
+
+  var _otherUserId = <String?>{};
   // late List<Message> messageList;
 
   @override
@@ -67,25 +63,17 @@ class _IndividualPageState extends State<IndividualPage> {
   }
 
   void connect() {
-    socket = io.io("${API}", <String, dynamic>{
+    socket = io.io(API, <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": true,
     });
 
     socket!.connect();
-
-    //TODO: new API
     socket!.emit("identity", widget.currentChat.id);
-
-    // print('Userid ne nene room: ${widget.conversation.chatRoomId}, otherUserId: ${_otherUserId}');
-    otherUserId();
-
     socket.onConnect((_) {
       print('connected');
 
       socket!.on("newMessage", (_data) {
-        print('sao ko chiuj vo day?');
-
         setMessage(_data['postedByUser']['_id'], _data['message']['messageText']);
         autoScrollToNewest();
       });
@@ -93,10 +81,10 @@ class _IndividualPageState extends State<IndividualPage> {
   }
 
   void setMessage(String postedByUserId, String message) {
-    User _usr = new User(id: postedByUserId);
-    Message _msg = new Message(messageText: message);
+    User _usr = User(id: postedByUserId);
+    Message _msg = Message(messageText: message);
 
-    Conversation cvs = new Conversation(
+    Conversation cvs = Conversation(
       postedByUserId: _usr,
       message: _msg,
     );
@@ -106,27 +94,8 @@ class _IndividualPageState extends State<IndividualPage> {
     });
   }
 
-  Future<void> otherUserId() async {
-    String? _otherUserId = "";
-    List<Conversation> _csvList = await fetchConversationInRoom();
-
-    await Future.forEach(_csvList, (_csv) async {
-      var __csv = _csv as Conversation;
-      if (__csv.postedByUserId!.id != widget.currentChat.id) {
-        _otherUserId = __csv.postedByUserId!.id;
-      }
-    });
-    socket!.emit('subscribe', {
-      widget.conversation.chatRoomId,
-      //FIX: otherUserId
-      widget.currentChat.id == '379f409892ad40faa801298f7e69f191'
-          ? '3b2ab7e5bcad47ebb3ada7888409e4d9'
-          : '379f409892ad40faa801298f7e69f191'
-    });
-  }
-
   Future<void> sendMsg(String msg) async {
-    final response = await http.post(Uri.parse('${API}/room/${conversations[0].chatRoomId}/message'),
+    await http.post(Uri.parse('$API/room/${conversations[0].chatRoomId}/message'),
         // Send authorization headers to the backend.
         headers: {
           "Authorization": 'Bearer ${widget.currentChat.token}',
@@ -136,7 +105,7 @@ class _IndividualPageState extends State<IndividualPage> {
   }
 
   void sendImage(String path, String message) async {
-    print("Duong dan cua anh ne 💰💰💰💰💰 ${path}");
+    print("Duong dan cua anh ne 💰💰💰💰💰 $path");
     print("💰💰💰💰💰 Caption cua anh la  $message");
     // var request = http.MultipartRequest("POST", Uri.parse("http://192.168.1.14:3000/addImage"));
     // if (path.isNotEmpty) {
@@ -161,13 +130,27 @@ class _IndividualPageState extends State<IndividualPage> {
 
   Future<List<Conversation>> fetchConversationInRoom() async {
     final response = await http.get(
-      Uri.parse("${API}/room/${widget.conversation.chatRoomId}"),
+      Uri.parse("$API/room/${widget.conversation.chatRoomId}"),
       headers: {
         "Authorization": 'Bearer ${widget.currentChat.token}',
       },
     );
     if (response.statusCode == 200) {
-      return Rooms.fromJson(jsonDecode(response.body)).conversations;
+      List<Conversation> _cvsList = Rooms.fromJson(jsonDecode(response.body)).conversations;
+      //push all ids in this conversation to a set<>
+      await Future.forEach(_cvsList, (cvs) {
+        Conversation _cvs = cvs as Conversation;
+        setState(() {
+          _otherUserId.add(_cvs.postedByUserId!.id);
+        });
+      });
+
+      //socket subcribe current user login and others to rooom
+      _otherUserId.forEach((_id) {
+        socket!.emit('subscribe', {widget.conversation.chatRoomId, _id});
+      });
+
+      return _cvsList;
     } else {
       throw Exception('Failed to load rooms');
     }
@@ -286,8 +269,9 @@ class _IndividualPageState extends State<IndividualPage> {
                             }
                             // }
                             );
-                      } else
+                      } else {
                         return const CircularProgressIndicator();
+                      }
                     },
                   ),
                 ),

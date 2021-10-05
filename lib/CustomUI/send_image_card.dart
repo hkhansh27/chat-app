@@ -16,7 +16,7 @@ class SendImageCard extends StatelessWidget {
           width: MediaQuery.of(context).size.width / 2.3,
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(15), color: Colors.pink[100]),
           child: Card(
-            margin: EdgeInsets.all(2),
+            margin: const EdgeInsets.all(2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             child: Image.file(
               File(path),
