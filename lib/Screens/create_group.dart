@@ -1,23 +1,18 @@
 import 'package:chat_app/CustomUI/avatar_card.dart';
 import 'package:chat_app/CustomUI/contact_card.dart';
-import 'package:chat_app/Models/chat_model.dart';
+import 'package:chat_app/Models/users_model.dart';
 import 'package:flutter/material.dart';
 
 class CreateGroup extends StatefulWidget {
-  const CreateGroup({Key? key}) : super(key: key);
+  const CreateGroup({Key? key, required this.userList}) : super(key: key);
+  final List<User>? userList;
 
   @override
   _CreateGroupState createState() => _CreateGroupState();
 }
 
 class _CreateGroupState extends State<CreateGroup> {
-  List<ChatModel> contacts = [
-    ChatModel(id: 1, name: "Khanh 1", status: "Ahihihi1"),
-    ChatModel(id: 2, name: "Khanh 2", status: "Ahihihi2"),
-    ChatModel(id: 3, name: "Khanh 3", status: "Ahihihi3"),
-  ];
-
-  List<ChatModel> groupSelected = [];
+  List<User> groupSelected = [];
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +41,21 @@ class _CreateGroupState extends State<CreateGroup> {
                   onTap: () {
                     //whether display or hidden an green icon check in contact_card
                     //contacts[index -1] and itemCount + 1 because if amount of users are selected > 0 then in itemBuiler, the index at 0 will be a container
-                    if (contacts[index - 1].select == false) {
+                    if (widget.userList![index - 1].select == false) {
                       setState(() {
-                        contacts[index - 1].select = true;
-                        groupSelected.add(contacts[index - 1]);
+                        widget.userList![index - 1].select = true;
+                        groupSelected.add(widget.userList![index - 1]);
                       });
                     } else {
                       setState(() {
-                        contacts[index - 1].select = false;
-                        groupSelected.remove(contacts[index - 1]);
+                        widget.userList![index - 1].select = false;
+                        groupSelected.remove(widget.userList![index - 1]);
                       });
                     }
                   },
-                  child: ContactCard(contact: contacts[index - 1]));
+                  child: ContactCard(user: widget.userList![index - 1]));
             },
-            itemCount: contacts.length + 1,
+            itemCount: widget.userList!.length + 1,
           ),
           //conditional show container which contains users are selected
           groupSelected.isNotEmpty
@@ -73,26 +68,40 @@ class _CreateGroupState extends State<CreateGroup> {
                             scrollDirection: Axis.horizontal,
                             itemBuilder: (context, index) {
                               //whether display or hidden an green icon check in avatar_card
-                              if (contacts[index].select == true) {
+                              if (widget.userList![index].select == true) {
                                 return InkWell(
                                     onTap: () {
                                       setState(() {
-                                        contacts[index].select = false;
-                                        groupSelected.remove(contacts[index]);
+                                        widget.userList![index].select = false;
+                                        groupSelected.remove(widget.userList![index]);
                                       });
                                     },
-                                    child: AvatarCard(contact: contacts[index]));
+                                    child: AvatarCard(user: widget.userList![index]));
                               } else {
                                 return Container();
                               }
                             },
-                            itemCount: contacts.length)),
+                            itemCount: widget.userList!.length)),
                     const Divider(
                       thickness: 2,
-                    )
+                    ),
                   ],
                 )
               : Container(),
+          groupSelected.isNotEmpty
+              ? Container(
+                  height: MediaQuery.of(context).size.height + 200,
+                  alignment: Alignment.bottomCenter,
+                  child: FloatingActionButton.extended(
+                    onPressed: () {
+                      // Add your onPressed code here!
+                    },
+                    label: const Text('Approve'),
+                    icon: const Icon(Icons.thumb_up),
+                    backgroundColor: Colors.pink,
+                  ),
+                )
+              : Container()
         ]));
   }
 }

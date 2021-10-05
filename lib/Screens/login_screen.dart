@@ -23,7 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
     super.initState();
     fetchUsers().then((data) {
       setState(() {
+        //fetch all uesrs from db include success code and list user in users_model :v
         _users = data;
+        //get list users from User
         userList = _users.users;
       });
     });
@@ -52,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
         }
       });
       if (hasUser) {
+        //remove logged user from user list
         userList!.remove(currentUser);
         userLogin(_userId).then((token) {
           currentUser.token = token;
@@ -95,8 +98,8 @@ class _LoginScreenState extends State<LoginScreen> {
       onSubmitAnimationCompleted: () {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => HomeScreen(
-            chats: userList,
-            currentChat: currentUser,
+            userList: userList,
+            currentUser: currentUser,
           ),
         ));
       },

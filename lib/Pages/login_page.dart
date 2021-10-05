@@ -1,9 +1,8 @@
 import 'package:chat_app/Screens/login_screen.dart';
 import 'package:flutter_login/flutter_login.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 
-const users = const {
+const users = {
   'hihihihi': 'khanh',
 };
 
@@ -11,7 +10,6 @@ class LoginPage extends StatelessWidget {
   Duration get loginTime => Duration(milliseconds: 2250);
 
   Future<String> _authUser(LoginData data) {
-    print('Name: ${data.name}, Password: ${data.password}');
     return Future.delayed(loginTime).then((_) {
       if (!users.containsKey(data.name)) {
         return 'User not exists';
@@ -24,7 +22,6 @@ class LoginPage extends StatelessWidget {
   }
 
   Future<String> _recoverPassword(String name) {
-    print('Name: $name');
     return Future.delayed(loginTime).then((_) {
       if (!users.containsKey(name)) {
         return 'User not exists';

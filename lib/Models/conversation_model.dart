@@ -3,18 +3,18 @@
 import 'package:chat_app/Models/msg_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 
-class Rooms {
+class Conversations {
   late bool? isSuccess;
   List<Conversation> conversations;
-  Rooms({this.isSuccess, required this.conversations});
-  factory Rooms.fromJson(dynamic json) {
+  Conversations({this.isSuccess, required this.conversations});
+  factory Conversations.fromJson(dynamic json) {
     if (json['conversation'] != null) {
       var conversationObjJson = json['conversation'] as List;
       List<Conversation> _conversations = conversationObjJson.map((cv) => Conversation.fromJson(cv)).toList();
 
-      return Rooms(isSuccess: json['success'], conversations: _conversations);
+      return Conversations(isSuccess: json['success'], conversations: _conversations);
     } else {
-      return Rooms(isSuccess: json['success'], conversations: []);
+      return Conversations(isSuccess: json['success'], conversations: []);
     }
   }
   @override

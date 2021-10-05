@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'call_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key, required this.chats, required this.currentChat}) : super(key: key);
-  final List<User>? chats;
-  final User currentChat;
+  const HomeScreen({Key? key, this.userList, required this.currentUser}) : super(key: key);
+  final List<User>? userList;
+  final User? currentUser;
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
@@ -21,7 +21,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _controller = TabController(length: 4, vsync: this, initialIndex: 1);
-    print(widget.currentChat.token);
+    print(widget.currentUser!.token);
   }
 
   @override
@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         controller: _controller,
         children: [
           const CameraPage(),
-          ChatPage(chats: widget.chats!, currentChat: widget.currentChat),
+          ChatPage(userList: widget.userList!, currentUser: widget.currentUser),
           const StatusPage(),
           const CallScreen(),
         ],

@@ -25,7 +25,8 @@ class Users {
 
 class User {
   String? id, firstName, lastName, token;
-  User({this.id, this.firstName, this.lastName, this.token});
+  bool? select;
+  User({this.id, this.firstName, this.lastName, this.token, this.select = false});
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(

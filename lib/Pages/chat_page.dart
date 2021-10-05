@@ -2,17 +2,22 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_app/CustomUI/custom_card.dart';
-import 'package:chat_app/Models/rooms_model.dart';
+import 'package:chat_app/Models/conversation_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 import 'package:chat_app/Screens/select_contact.dart';
+import 'package:chat_app/Util/app_rebuilder.dart';
 import 'package:chat_app/Util/const.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class ChatPage extends StatefulWidget {
-  const ChatPage({Key? key, required this.chats, required this.currentChat}) : super(key: key);
-  final List<User> chats;
-  final User currentChat;
+  const ChatPage({Key? key, this.userList, this.currentUser}) : super(key: key);
+  final List<User>? userList;
+  final User? currentUser;
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_ChatPageState>()?.restartApp();
+  }
 
   @override
   _ChatPageState createState() => _ChatPageState();
@@ -21,6 +26,15 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   late List<Conversation> _conversations;
   late Future<List<Conversation>> futureRecentChat;
+  late Function listener;
+
+  Key key = UniqueKey();
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -31,11 +45,11 @@ class _ChatPageState extends State<ChatPage> {
     final response = await http.get(
       Uri.parse("$API/room"),
       headers: {
-        "Authorization": 'Bearer ${widget.currentChat.token}',
+        "Authorization": 'Bearer ${widget.currentUser!.token}',
       },
     );
     if (response.statusCode == 200) {
-      return Rooms.fromJson(jsonDecode(response.body)).conversations;
+      return Conversations.fromJson(jsonDecode(response.body)).conversations;
     } else {
       throw Exception('Failed to load rooms');
     }
@@ -43,10 +57,23 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
+    listener() {
+      ChatPage.restartApp(context);
+    }
+
     return Scaffold(
+      key: key,
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (builder) => const SelectContact()));
+          Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (builder) => SelectContact(userList: widget.userList, currentUser: widget.currentUser)))
+              .then((value) {
+            ChatPage.restartApp(context);
+            AppBuilder.of(context)?.rebuild();
+            fetchRecentChat();
+          });
         },
         child: const Icon(Icons.chat),
       ),
@@ -60,14 +87,18 @@ class _ChatPageState extends State<ChatPage> {
               itemCount: _conversations.length,
               itemBuilder: (context, index) {
                 return CustomCard(
-                  chatModel: widget.chats[index],
-                  currentChat: widget.currentChat,
+                  //????
+                  recentUserChat: _conversations[index].postedByUserId,
+                  listener: listener,
+                  bContext: context,
+                  currentChat: widget.currentUser,
                   conversation: _conversations[index],
                 );
               },
             );
-          } else
+          } else {
             return const CircularProgressIndicator();
+          }
         },
       ),
     );

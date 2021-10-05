@@ -1,24 +1,26 @@
+import 'dart:convert';
+
 import 'package:chat_app/CustomUI/button_card.dart';
 import 'package:chat_app/CustomUI/contact_card.dart';
-import 'package:chat_app/Models/chat_model.dart';
+import 'package:chat_app/Models/room_model.dart';
+import 'package:chat_app/Models/users_model.dart';
+import 'package:chat_app/Screens/home_screen.dart';
+import 'package:chat_app/Util/const.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 import 'create_group.dart';
 
 class SelectContact extends StatefulWidget {
-  const SelectContact({Key? key}) : super(key: key);
+  const SelectContact({Key? key, this.userList, this.currentUser}) : super(key: key);
+  final List<User>? userList;
+  final User? currentUser;
 
   @override
   _SelectContactState createState() => _SelectContactState();
 }
 
 class _SelectContactState extends State<SelectContact> {
-  List<ChatModel> contacts = [
-    ChatModel(id: 1, name: "Khanh 1", status: "Ahihihi1"),
-    ChatModel(id: 2, name: "Khanh 2", status: "Ahihihi2"),
-    ChatModel(id: 3, name: "Khanh 3", status: "Ahihihi3"),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +64,8 @@ class _SelectContactState extends State<SelectContact> {
             if (index == 0) {
               return InkWell(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (builder) => const CreateGroup()));
+                  Navigator.push(
+                      context, MaterialPageRoute(builder: (builder) => CreateGroup(userList: widget.userList)));
                 },
                 child: const ButtonCard(
                   icon: Icons.group_add_sharp,
@@ -73,9 +76,57 @@ class _SelectContactState extends State<SelectContact> {
             if (index == 1) {
               return InkWell(onTap: () {}, child: const ButtonCard(icon: Icons.person_add, name: "New contact"));
             }
-            return InkWell(onTap: () {}, child: ContactCard(contact: contacts[index - 2]));
+            return InkWell(
+                onTap: () async {
+                  await newChatRoom(widget.currentUser!.token, widget.userList![index - 2].id, context, widget.userList,
+                      widget.currentUser);
+                },
+                child: ContactCard(user: widget.userList![index - 2]));
           },
-          itemCount: contacts.length + 2, // "+2" because two btn card in the top of page
+          itemCount: widget.userList!.length + 2, // "+2" because two btn card in the top of page
         ));
+  }
+}
+
+Future<void> newChatRoom(String? tokenCurrentUser, String? otherUserId, BuildContext context, List<User>? userList,
+    User? currentUser) async {
+  try {
+    var otherUserIds = [];
+    otherUserIds.add(otherUserId);
+    final response = await http.post(Uri.parse('$API/room/initiate'),
+        // Send authorization headers to the backend.
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+          "Authorization": 'Bearer $tokenCurrentUser',
+        },
+        body: jsonEncode(<String, dynamic>{
+          "userIds": otherUserIds,
+          "type": "member-to-member",
+        }));
+
+    Room room = Room.fromJson(jsonDecode(response.body)['chatRoom']);
+
+    if (room.isNew!) {
+      await http.post(Uri.parse('$API/room/${room.chatRoomId}/message'), headers: {
+        "Authorization": 'Bearer $tokenCurrentUser',
+      }, body: {
+        "messageText": "Hello"
+      });
+    }
+
+    // Future.delayed(Duration(seconds: 4), () {
+    //   Navigator.pushReplacement(
+    //     context,
+    //     MaterialPageRoute(
+    //         builder: (context) => HomeScreen(
+    //               userList: userList,
+    //               currentUser: currentUser,
+    //             )),
+    //   );
+    // }
+    // );
+  } catch (e) {
+    throw e;
   }
 }

@@ -1,10 +1,10 @@
-import 'package:chat_app/Models/chat_model.dart';
+import 'package:chat_app/Models/users_model.dart';
 import 'package:flutter/material.dart';
 
 class AvatarCard extends StatelessWidget {
-  const AvatarCard({Key? key, required this.contact}) : super(key: key);
+  const AvatarCard({Key? key, required this.user}) : super(key: key);
 
-  final ChatModel contact;
+  final User user;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +32,7 @@ class AvatarCard extends StatelessWidget {
               ),
             )
           ]),
-          Text("${contact.name}")
+          Text("${user.firstName}")
         ],
       ),
     );
