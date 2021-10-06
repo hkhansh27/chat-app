@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'call_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key, this.userList, required this.currentUser}) : super(key: key);
+  const HomeScreen({Key? key, this.userList, this.currentUser}) : super(key: key);
   final List<User>? userList;
   final User? currentUser;
 
@@ -21,7 +21,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   void initState() {
     super.initState();
     _controller = TabController(length: 4, vsync: this, initialIndex: 1);
-    print(widget.currentUser!.token);
   }
 
   @override

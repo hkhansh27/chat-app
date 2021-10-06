@@ -19,7 +19,7 @@ class Users {
   }
   @override
   String toString() {
-    return '{✅✅✅✅ ${this.isSuccess}, ${this.users}}';
+    return '${this.users}';
   }
 }
 
@@ -39,6 +39,6 @@ class User {
   @override
   String toString() {
     // TODO: implement toString
-    return '{✅✅✅✅ ${this.id}}';
+    return ' ${this.firstName}';
   }
 }

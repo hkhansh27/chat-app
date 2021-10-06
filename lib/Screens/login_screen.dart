@@ -42,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Duration get loginTime => const Duration(milliseconds: 2250);
 
-  Future<String> _authUser(LoginData data) {
+  Future<String> _loginUser(LoginData data) {
     return Future.delayed(loginTime).then((_) {
       bool hasUser = false;
       String? _userId = "";
@@ -63,6 +63,21 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         return "User not found, please try again!";
       }
+    });
+  }
+
+  Future<String> _signupUser(LoginData data) {
+    return Future.delayed(loginTime).then((_) async {
+      await http
+          .post(Uri.parse('$API/users'), body: {"firstName": data.name, "lastName": data.password, "type": 'member'});
+      await fetchUsers().then((data) {
+        setState(() {
+          _users = data;
+          //get list users from User
+          userList = _users.users;
+        });
+      });
+      return "";
     });
   }
 
@@ -93,8 +108,9 @@ class _LoginScreenState extends State<LoginScreen> {
       title: 'TIKTIK',
       userValidator: _validatorFirstName,
       passwordValidator: _validatorLastName,
-      onLogin: _authUser,
-      onSignup: _authUser,
+      onLogin: _loginUser,
+      onSignup: _signupUser,
+      loginAfterSignUp: false,
       onSubmitAnimationCompleted: () {
         Navigator.of(context).pushReplacement(MaterialPageRoute(
           builder: (context) => HomeScreen(

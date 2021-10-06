@@ -19,7 +19,7 @@ class Conversations {
   }
   @override
   String toString() {
-    return '{ day la cai room, ${conversations}}';
+    return '{ day la cai room, $conversations}';
   }
 }
 

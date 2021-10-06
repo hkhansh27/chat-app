@@ -47,6 +47,7 @@ class _IndividualPageState extends State<IndividualPage> {
   XFile? file;
 
   var _otherUserId = <String?>{};
+  late List<User>? _usersInRoom = [];
 
   @override
   void initState() {
@@ -91,6 +92,7 @@ class _IndividualPageState extends State<IndividualPage> {
 
       socket!.on("newMessage", (_data) {
         setMessage(_data['postedByUser']['_id'], _data['message']['messageText']);
+        //FIX: auto scroll to newest message does not working when we leave and join room chat again
         // autoScrollToNewest();
       });
     });
@@ -153,7 +155,15 @@ class _IndividualPageState extends State<IndividualPage> {
         "Authorization": 'Bearer ${widget.currentChat!.token}',
       },
     );
+
     if (response.statusCode == 200) {
+      //remove current logged user in user fetch from db to render name's chat room
+      var _usrs = Users.fromJson(jsonDecode(response.body));
+      setState(() {
+        _usrs.users?.removeWhere((item) => item.id == widget.currentChat!.id);
+        _usersInRoom = _usrs.users;
+      });
+
       List<Conversation> _cvsList = Conversations.fromJson(jsonDecode(response.body)).conversations;
       //push all ids in this conversation to a set<>
       await Future.forEach(_cvsList, (cvs) {
@@ -207,7 +217,7 @@ class _IndividualPageState extends State<IndividualPage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(widget.recentUserChat!.firstName as String,
+                    Text(_usersInRoom?.join(',') as String,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -280,7 +290,7 @@ class _IndividualPageState extends State<IndividualPage> {
                                   //  if (messages[index].path.isNotEmpty) {
                                   //   return SendImageCard(path: messages[index].path);
                                   // } else {
-                                  //   return SendCard(data: conversations[index].message!.messageText);
+                                  //   return SendCard(data: _cvs[index].message!.messageText);
                                   // }
                                 } else {
                                   // if (messages[index].path.isNotEmpty) {
