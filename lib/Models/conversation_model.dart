@@ -1,8 +1,10 @@
 // ignore_for_file: unnecessary_this
 
 import 'package:chat_app/Models/msg_model.dart';
+import 'package:chat_app/Models/room_model.dart';
 import 'package:chat_app/Models/users_model.dart';
 
+// import 'package:intl/intl.dart';
 class Conversations {
   late bool? isSuccess;
   List<Conversation> conversations;
@@ -27,8 +29,17 @@ class Conversation {
   late String? id, messageId, chatRoomId;
   late Message? message;
   late User? postedByUserId;
+  late String? createdAt;
+  late List<dynamic>? amountMember;
 
-  Conversation({this.id, this.messageId, this.chatRoomId, required this.message, this.postedByUserId});
+  Conversation(
+      {this.id,
+      this.messageId,
+      this.chatRoomId,
+      required this.message,
+      this.postedByUserId,
+      this.createdAt,
+      this.amountMember});
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
     return Conversation(
@@ -36,10 +47,12 @@ class Conversation {
         messageId: json['messageId'],
         chatRoomId: json['chatRoomId'],
         message: json['message'] == null ? null : Message.fromJson(json['message']),
-        postedByUserId: json['postedByUser'] == null ? null : User.fromJson(json['postedByUser']));
+        postedByUserId: json['postedByUser'] == null ? null : User.fromJson(json['postedByUser']),
+        createdAt: json['createdAt'],
+        amountMember: json['roomInfo']);
   }
   @override
   String toString() {
-    return '${this.message},${this.chatRoomId},${this.postedByUserId}';
+    return '😍${this.amountMember} 😍';
   }
 }

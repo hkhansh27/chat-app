@@ -40,17 +40,17 @@ class CustomCard extends StatelessWidget {
       child: Column(
         children: [
           ListTile(
-            leading: const CircleAvatar(
+            leading: CircleAvatar(
               radius: 25,
               child: Icon(
-                Icons.person,
-                // (chatModel.isGroup!) ? Icons.groups : Icons.person,
+                //check if member inside this room more than two, render a group icon
+                (conversation.amountMember!.length > 2) ? Icons.groups : Icons.person,
                 color: Colors.white,
               ),
               backgroundColor: Colors.blueGrey,
             ),
-            title:
-                Text("${conversation.chatRoomId}", style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            title: Text("Room ${conversation.chatRoomId!.substring(1, 5)}",
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             subtitle: Row(
               children: [
                 const Icon(Icons.done),
@@ -62,7 +62,7 @@ class CustomCard extends StatelessWidget {
                 // Text("${chatModel.currentMessage}")
               ],
             ),
-            trailing: Text(DateTime.now().toString().substring(10, 16)),
+            trailing: Text(conversation.createdAt!.substring(11, 16)),
             // Text("${chatModel.time}"),
           ),
           const Padding(

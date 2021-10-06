@@ -286,7 +286,12 @@ class _IndividualPageState extends State<IndividualPage> {
                                   );
                                 }
                                 if (conversations[index].postedByUserId!.id == widget.currentChat!.id) {
-                                  return SendCard(data: conversations[index].message!.messageText);
+                                  return SendCard(
+                                      message: conversations[index].message!.messageText,
+                                      //FIX: render sent message's time incorrect
+                                      time: conversations[index].createdAt == null
+                                          ? DateTime.now().toString().substring(10, 16)
+                                          : conversations[index].createdAt!.substring(11, 16));
                                   //  if (messages[index].path.isNotEmpty) {
                                   //   return SendImageCard(path: messages[index].path);
                                   // } else {
@@ -296,7 +301,12 @@ class _IndividualPageState extends State<IndividualPage> {
                                   // if (messages[index].path.isNotEmpty) {
                                   //   return ReceiveImageCard(path: messages[index].path);
                                   // } else {
-                                  return RecevieCard(data: conversations[index].message!.messageText);
+                                  return RecevieCard(
+                                      message: conversations[index].message!.messageText,
+                                      //FIX: render sent message's time incorrect
+                                      time: conversations[index].createdAt == null
+                                          ? DateTime.now().toString().substring(10, 16)
+                                          : conversations[index].createdAt!.substring(11, 16));
                                 }
                               }
                               // }

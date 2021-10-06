@@ -1,8 +1,9 @@
+import 'package:chat_app/Models/msg_model.dart';
 import 'package:flutter/material.dart';
 
 class RecevieCard extends StatelessWidget {
-  const RecevieCard({Key? key, required this.data}) : super(key: key);
-  final String data;
+  const RecevieCard({Key? key, required this.message, required this.time}) : super(key: key);
+  final String message, time;
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +22,7 @@ class RecevieCard extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.only(left: 10, right: 30, top: 10, bottom: 20),
                 child: Text(
-                  data,
+                  message,
                   style: const TextStyle(fontSize: 16),
                 ),
               ),
@@ -29,7 +30,7 @@ class RecevieCard extends StatelessWidget {
                   bottom: 4,
                   right: 10,
                   child: Text(
-                    DateTime.now().toString().substring(10, 16),
+                    time,
                     style: const TextStyle(fontSize: 13, color: Colors.black54),
                   ))
             ])),

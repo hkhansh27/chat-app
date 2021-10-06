@@ -27,7 +27,6 @@ class _ChatPageState extends State<ChatPage> {
   late List<Conversation> _conversations;
   late Future<List<Conversation>> futureRecentChat;
   late Function listener;
-
   Key key = UniqueKey();
   void restartApp() {
     setState(() {
