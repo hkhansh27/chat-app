@@ -65,7 +65,10 @@ class _SelectContactState extends State<SelectContact> {
               return InkWell(
                 onTap: () {
                   Navigator.push(
-                      context, MaterialPageRoute(builder: (builder) => CreateGroup(userList: widget.userList)));
+                      context,
+                      MaterialPageRoute(
+                          builder: (builder) =>
+                              CreateGroup(userList: widget.userList, currentUser: widget.currentUser)));
                 },
                 child: const ButtonCard(
                   icon: Icons.group_add_sharp,

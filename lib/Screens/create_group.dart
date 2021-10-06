@@ -1,11 +1,17 @@
+import 'dart:convert';
+
 import 'package:chat_app/CustomUI/avatar_card.dart';
 import 'package:chat_app/CustomUI/contact_card.dart';
+import 'package:chat_app/Models/room_model.dart';
 import 'package:chat_app/Models/users_model.dart';
+import 'package:chat_app/Util/const.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 class CreateGroup extends StatefulWidget {
-  const CreateGroup({Key? key, required this.userList}) : super(key: key);
+  const CreateGroup({Key? key, required this.userList, required this.currentUser}) : super(key: key);
   final List<User>? userList;
+  final User? currentUser;
 
   @override
   _CreateGroupState createState() => _CreateGroupState();
@@ -93,7 +99,9 @@ class _CreateGroupState extends State<CreateGroup> {
                   height: MediaQuery.of(context).size.height + 200,
                   alignment: Alignment.bottomCenter,
                   child: FloatingActionButton.extended(
-                    onPressed: () {
+                    onPressed: () async {
+                      print(groupSelected);
+                      await newChatRoom();
                       // Add your onPressed code here!
                     },
                     label: const Text('Approve'),
@@ -103,5 +111,51 @@ class _CreateGroupState extends State<CreateGroup> {
                 )
               : Container()
         ]));
+  }
+
+  Future<void> newChatRoom() async {
+    try {
+      var otherUserIds = [];
+      groupSelected.forEach((selectedUser) {
+        otherUserIds.add(selectedUser.id);
+      });
+      final response = await http.post(Uri.parse('$API/room/initiate'),
+          // Send authorization headers to the backend.
+          headers: {
+            'Content-type': 'application/json',
+            'Accept': 'application/json',
+            "Authorization": 'Bearer ${widget.currentUser!.token}',
+          },
+          body: jsonEncode(<String, dynamic>{
+            "userIds": otherUserIds,
+            "type": "member-to-member",
+          }));
+
+      Room room = Room.fromJson(jsonDecode(response.body)['chatRoom']);
+
+      if (room.isNew!) {
+        await http.post(Uri.parse('$API/room/${room.chatRoomId}/message'), headers: {
+          "Authorization": 'Bearer ${widget.currentUser!.token}',
+        }, body: {
+          "messageText": "Hello"
+        });
+
+        groupSelected.clear();
+      }
+
+      // Future.delayed(Duration(seconds: 4), () {
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(
+      //         builder: (context) => HomeScreen(
+      //               userList: userList,
+      //               currentUser: currentUser,
+      //             )),
+      //   );
+      // }
+      // );
+    } catch (e) {
+      throw e;
+    }
   }
 }
