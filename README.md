@@ -13,7 +13,7 @@
 - Websocket
 - Mongodb
 - NodeJs
-- Rest API was built by me
+- Rest API
 
 
 
